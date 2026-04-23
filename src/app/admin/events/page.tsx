@@ -1,17 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AddEventDialog, DeleteEventButton } from "./client-components";
+import { AddEventDialog, ArchiveEventButton, EditEventDialog } from "./client-components";
 
 export default async function EventsPage() {
   const supabase = createClient();
-  const { data: events } = await supabase.from('events').select('*').order('date', { ascending: true });
+  const { data: events } = await supabase.from('events').select('*').eq('is_archived', false).order('date', { ascending: true });
+  const { data: ministries } = await supabase.from('ministries').select('name').eq('is_archived', false).order('name', { ascending: true });
 
   return (
     <>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Events</h1>
-        <AddEventDialog />
+        <AddEventDialog ministries={ministries || []} />
       </div>
 
       <Card className="border-0 shadow-sm mt-6">
@@ -35,8 +36,9 @@ export default async function EventsPage() {
                   </TableCell>
                   <TableCell className="text-neutral-500">{event.location || "-"}</TableCell>
                   <TableCell className="text-neutral-500">{event.ministry || "General"}</TableCell>
-                  <TableCell className="text-right px-6">
-                    <DeleteEventButton id={event.id} />
+                  <TableCell className="text-right px-6 flex justify-end gap-2">
+                    <EditEventDialog event={event} ministries={ministries || []} />
+                    <ArchiveEventButton id={event.id} />
                   </TableCell>
                 </TableRow>
               )) : (

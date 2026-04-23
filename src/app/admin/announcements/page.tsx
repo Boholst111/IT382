@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AddAnnouncementDialog, DeleteAnnouncementButton } from "./client-components";
+import { AddAnnouncementDialog, ArchiveAnnouncementButton, EditAnnouncementDialog } from "./client-components";
 
 export default async function AnnouncementsPage() {
   const supabase = createClient();
-  const { data: announcements } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+  const { data: announcements } = await supabase.from('announcements').select('*').eq('is_archived', false).order('created_at', { ascending: false });
 
   return (
     <>
@@ -39,8 +39,9 @@ export default async function AnnouncementsPage() {
                   <TableCell className="text-neutral-500">
                     {ann.expiration_date ? new Date(ann.expiration_date).toLocaleDateString() : "-"}
                   </TableCell>
-                  <TableCell className="text-right px-6">
-                    <DeleteAnnouncementButton id={ann.id} />
+                  <TableCell className="text-right px-6 flex justify-end gap-2">
+                    <EditAnnouncementDialog announcement={ann} />
+                    <ArchiveAnnouncementButton id={ann.id} />
                   </TableCell>
                 </TableRow>
               )) : (

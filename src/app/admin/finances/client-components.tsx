@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -69,5 +70,39 @@ export function AddFinanceDialog() {
         </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+export function FinanceTimeFilter() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const currentFilter = searchParams.get('range') || 'all'
+  const [isPending, startTransition] = useTransition()
+
+  const handleFilterChange = (value: string | null) => {
+    if (!value) return;
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value === 'all') {
+        params.delete('range')
+      } else {
+        params.set('range', value)
+      }
+      router.push(`?${params.toString()}`)
+    })
+  }
+
+  return (
+    <Select value={currentFilter} onValueChange={handleFilterChange} disabled={isPending}>
+      <SelectTrigger className="w-[180px] bg-white border-neutral-200">
+        <SelectValue placeholder="Time Range" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All Records</SelectItem>
+        <SelectItem value="weekly">This Week</SelectItem>
+        <SelectItem value="monthly">This Month</SelectItem>
+        <SelectItem value="yearly">This Year</SelectItem>
+      </SelectContent>
+    </Select>
   )
 }

@@ -19,7 +19,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased bg-gray-50 text-gray-900`}>
         {children}
-        <Toaster />
+        <Toaster 
+          position="top-right" 
+          richColors
+          toastOptions={{
+            classNames: {
+              success: 'bg-emerald-600 text-white border-emerald-600',
+            },
+          }}
+        />
       </body>
     </html>
   );

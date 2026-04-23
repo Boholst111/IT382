@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { CalendarIcon, BellIcon, MapPinIcon } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
@@ -7,10 +7,9 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const supabase = createClient();
 
-  const { data: announcements, error: annError } = await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(5);
-  const { data: events, error: evError } = await supabase.from('events').select('*').order('date', { ascending: true }).limit(5);
-
-  console.log('HOME DATA:', { announcements, annError, events, evError });
+  const { data: announcements } = await supabase.from('announcements').select('*').eq('is_archived', false).order('created_at', { ascending: false }).limit(5);
+  const { data: events } = await supabase.from('events').select('*').eq('is_archived', false).order('date', { ascending: true }).limit(5);
+  const { data: cms } = await supabase.from('cms').select('*').eq('id', 'main').maybeSingle();
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700">
@@ -20,13 +19,13 @@ export default async function HomePage() {
          <div className="absolute bottom-0 left-0 -mb-16 -ml-16 w-48 h-48 bg-indigo-500 rounded-full blur-3xl opacity-20" />
          <div className="relative z-10 max-w-2xl">
            <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-100 text-sm font-semibold tracking-wider mb-6">
-             PORTAL
+             COMMUNITY PORTAL
            </span>
-           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-             Welcome Back to Mahayahay
+           <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-[0.9]">
+             Welcome to <br /> {cms?.church_name || "Mahayahay"}
            </h1>
-           <p className="text-blue-100 text-lg md:text-xl font-light leading-relaxed">
-             Here is what is happening in our community. Stay updated with the latest announcements and upcoming events.
+           <p className="text-blue-100 text-lg md:text-xl font-medium leading-relaxed opacity-80 mt-6">
+             Stay connected with our latest spiritual updates and community gatherings.
            </p>
          </div>
        </div>

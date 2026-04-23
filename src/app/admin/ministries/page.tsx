@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AddMinistryDialog, DeleteMinistryButton } from "./client-components";
+import { AddMinistryDialog, ArchiveMinistryButton, EditMinistryDialog } from "./client-components";
 
 export default async function MinistriesPage() {
   const supabase = createClient();
-  const { data: ministries } = await supabase.from('ministries').select('*').order('name', { ascending: true });
+  const { data: ministries } = await supabase.from('ministries').select('*').eq('is_archived', false).order('name', { ascending: true });
 
   return (
     <>
@@ -31,8 +31,9 @@ export default async function MinistriesPage() {
                   <TableCell className="font-bold text-neutral-900 py-3 px-6">{m.name}</TableCell>
                   <TableCell className="text-neutral-500">{m.leader || "TBD"}</TableCell>
                   <TableCell className="text-neutral-500">{new Date(m.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right px-6">
-                    <DeleteMinistryButton id={m.id} />
+                  <TableCell className="text-right px-6 flex justify-end gap-2">
+                    <EditMinistryDialog ministry={m} />
+                    <ArchiveMinistryButton id={m.id} />
                   </TableCell>
                 </TableRow>
               )) : (

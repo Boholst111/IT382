@@ -74,7 +74,7 @@ export async function middleware(request: NextRequest) {
     const role = userData?.role || 'viewer';
     console.log('MIDDLEWARE LOG:', { path: url.pathname, email: user.email, role });
 
-    if (isAuthPage || url.pathname === '/') {
+    if (isAuthPage) {
        return NextResponse.redirect(new URL(role === 'admin' ? '/admin/dashboard' : '/home', request.url))
     }
     

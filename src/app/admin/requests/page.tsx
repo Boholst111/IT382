@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DeleteRequestButton } from "./client-components";
+import { ArchiveRequestButton } from "./client-components";
 
 export default async function PrayerRequestsPage() {
   const supabase = createClient();
-  const { data: requests } = await supabase.from('prayer_requests').select('*').order('created_at', { ascending: false });
+  const { data: requests } = await supabase.from('prayer_requests').select('*').eq('is_archived', false).order('created_at', { ascending: false });
 
   return (
     <>
@@ -29,7 +29,7 @@ export default async function PrayerRequestsPage() {
                   <TableCell className="text-neutral-600 max-w-lg">{r.message}</TableCell>
                   <TableCell className="text-neutral-500 text-xs">{new Date(r.created_at).toLocaleString()}</TableCell>
                   <TableCell className="text-right px-6">
-                    <DeleteRequestButton id={r.id} />
+                    <ArchiveRequestButton id={r.id} />
                   </TableCell>
                 </TableRow>
               )) : (

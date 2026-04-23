@@ -1,22 +1,51 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUpIcon, TrendingDownIcon } from "lucide-react";
-import { AddFinanceDialog } from "./client-components";
+import { TrendingUpIcon, TrendingDownIcon, WalletIcon } from "lucide-react";
+import { AddFinanceDialog, FinanceTimeFilter } from "./client-components";
 import { ExportFinancesButton } from "./export-button";
+import { Suspense } from "react";
 
-export default async function FinancesPage() {
+export default async function FinancesPage({ searchParams }: { searchParams: { range?: string } }) {
   const supabase = createClient();
-  const { data: records } = await supabase.from('finances').select('*').order('date', { ascending: false });
+  const range = searchParams.range || 'all';
+  
+  let query = supabase.from('finances').select('*');
+  
+  const now = new Date();
+  if (range === 'weekly') {
+    const lastWeek = new Date();
+    lastWeek.setDate(now.getDate() - 7);
+    query = query.gte('date', lastWeek.toISOString());
+  } else if (range === 'monthly') {
+    const lastMonth = new Date();
+    lastMonth.setMonth(now.getMonth() - 1);
+    query = query.gte('date', lastMonth.toISOString());
+  } else if (range === 'yearly') {
+    const lastYear = new Date();
+    lastYear.setFullYear(now.getFullYear() - 1);
+    query = query.gte('date', lastYear.toISOString());
+  }
+
+  const { data: records } = await query.order('date', { ascending: false });
 
   const totalIncome = records?.filter(r => r.type !== 'expense').reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
   const totalExpense = records?.filter(r => r.type === 'expense').reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
 
   return (
     <>
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Finances</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-neutral-900 tracking-tight flex items-center gap-2">
+            <WalletIcon className="w-8 h-8 text-blue-600" />
+            Finances
+          </h1>
+          <p className="text-neutral-500 font-medium">Tracking {range} financial records.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+           <Suspense>
+             <FinanceTimeFilter />
+           </Suspense>
            <ExportFinancesButton data={records || []} />
            <AddFinanceDialog />
         </div>
@@ -29,7 +58,7 @@ export default async function FinancesPage() {
             <TrendingUpIcon className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-700">${totalIncome.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-green-700">₱{totalIncome.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm bg-red-50/50">
@@ -38,7 +67,7 @@ export default async function FinancesPage() {
             <TrendingDownIcon className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-700">${totalExpense.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-red-700">₱{totalExpense.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
@@ -70,7 +99,7 @@ export default async function FinancesPage() {
                   </TableCell>
                   <TableCell className="font-medium text-neutral-900">{record.description || "-"}</TableCell>
                   <TableCell className={`text-right px-6 font-bold ${record.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
-                    {record.type === 'expense' ? '-' : '+'}${Number(record.amount).toLocaleString()}
+                    {record.type === 'expense' ? '-' : '+'}₱{Number(record.amount).toLocaleString()}
                   </TableCell>
                 </TableRow>
               )) : (

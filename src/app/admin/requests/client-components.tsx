@@ -1,24 +1,24 @@
 'use client'
 
-import { deletePrayerRequest } from "./actions"
+import { archivePrayerRequest } from "./actions"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Trash2Icon } from "lucide-react"
+import { ArchiveIcon } from "lucide-react"
 
-export function DeleteRequestButton({ id }: { id: string }) {
-  async function handleDelete() {
-    if (!confirm("Remove this prayer request?")) return
+export function ArchiveRequestButton({ id }: { id: string }) {
+  async function handleArchive() {
+    if (!confirm("Archive this prayer request?")) return
     try {
-      await deletePrayerRequest(id)
-      toast.success("Request removed")
+      await archivePrayerRequest(id)
+      toast.success("Request archived")
     } catch (err: unknown) {
       toast.error((err as Error).message)
     }
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={handleDelete} className="text-red-500">
-      <Trash2Icon className="w-4 h-4" />
+    <Button variant="ghost" size="icon" onClick={handleArchive} className="text-amber-600 hover:bg-amber-50" title="Archive">
+      <ArchiveIcon className="w-4 h-4" />
     </Button>
   )
 }
